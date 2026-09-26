@@ -26,12 +26,21 @@ const websiteSettingsSchema = new mongoose.Schema(
           trim: true,
           required: true,
         },
+        publicId:{
+          type: String,
+          trim: true,
+          required: true
+        }
       },
       favicon: {
         url: {
           type: String,
           trim: true,
-        }, //cloudinary
+        }, 
+        publicId:{
+          type: String,
+          trim: true
+        }
       },
     },
     contact: {

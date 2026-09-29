@@ -162,7 +162,7 @@ websiteSettingsRouter.patch(
         })
       }
 
-      // Business updation
+      // Business update
       if (request.body.business) {
         const business = parseJSON(request.body.business, 'business')
 
@@ -175,7 +175,7 @@ websiteSettingsRouter.patch(
         }
       }
 
-      // Logo updation handling
+      // Logo update handling
       const logoFile = request.files?.logo?.[0]
 
       if (logoFile) {
@@ -190,7 +190,7 @@ websiteSettingsRouter.patch(
         }
       }
 
-      //Favicon updation
+      //Favicon update
       const faviconFile = request.files?.favicon?.[0]
       if (faviconFile) {
         oldFaviconPublicId = existingSettings.business.favicon?.publicId
@@ -207,7 +207,7 @@ websiteSettingsRouter.patch(
         }
       }
 
-      // Contact updation
+      // Contact update
       if (request.body.contact) {
         const contact = parseJSON(request.body.contact, 'contact')
 
@@ -217,7 +217,7 @@ websiteSettingsRouter.patch(
         }
       }
 
-      // Address updation
+      // Address update
       if (request.body.address) {
         const address = parseJSON(request.body.address, 'address')
 
@@ -227,7 +227,7 @@ websiteSettingsRouter.patch(
         }
       }
 
-      // Shop updation
+      // Shop update
       if (request.body.shop) {
         const shop = parseJSON(request.body.shop, 'shop')
 
@@ -237,7 +237,7 @@ websiteSettingsRouter.patch(
         }
       }
 
-      // SocialLinks updation
+      // SocialLinks update
       if (request.body.socialLinks) {
         const socialLinks = parseJSON(request.body.socialLinks, 'socialLinks')
 
@@ -247,7 +247,7 @@ websiteSettingsRouter.patch(
         }
       }
 
-      // SEO updation
+      // SEO update
       if (request.body.seo) {
         const seo = parseJSON(request.body.seo, 'seo')
 
@@ -257,7 +257,7 @@ websiteSettingsRouter.patch(
         }
       }
 
-      // Footer updation
+      // Footer update
       if (request.body.footer) {
         const footer = parseJSON(request.body.footer, 'footer')
 
@@ -334,5 +334,9 @@ websiteSettingsRouter.patch(
     }
   },
 )
+
+websiteSettingsRouter.delete('/', async (request, response) => {
+  response.json({ message: 'under improvement' })
+})
 
 module.exports = websiteSettingsRouter

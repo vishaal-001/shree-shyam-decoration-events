@@ -111,7 +111,7 @@ const serviceSchema = new mongoose.Schema(
 )
 
 //slug generation
-serviceSchema.pre('validate', function (next) {
+serviceSchema.pre('validate', function () {
   if (this.isModified('name')) {
     this.slug = this.name
       .toLowerCase()
@@ -119,8 +119,6 @@ serviceSchema.pre('validate', function (next) {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '')
   }
-
-  next()
 })
 
 module.exports = mongoose.model('Service', serviceSchema)

@@ -4,6 +4,7 @@ const config = require('./utils/config')
 const logger = require('./utils/logger')
 const mongoose = require('mongoose')
 const websiteSettingsRouter = require('./controllers/websiteSettings')
+const serviceRouter = require('./controllers/service')
 const cloudinary = require('cloudinary').v2
 
 logger.info('connecting to mongodb')
@@ -31,5 +32,6 @@ app.get('/', (request, response) => {
 })
 
 app.use('/api/settings', websiteSettingsRouter)
+app.use('/api/services', serviceRouter)
 
 module.exports = app

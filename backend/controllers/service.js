@@ -81,13 +81,13 @@ serviceRouter.post(
         thumbnailFile.buffer,
         'ssde/service/thumbnail',
       )
-      logger.info('ThumbnailResult', thumbnailResult)
+      // logger.info('ThumbnailResult', thumbnailResult)
 
       coverImageResult = await uploadToCloudinary(
         coverImageFile.buffer,
         'ssde/service/coverImage',
       )
-      logger.info('CoverImageResult', coverImageResult)
+      // logger.info('CoverImageResult', coverImageResult)
 
       const service = await Service.create({
         name,
@@ -108,7 +108,7 @@ serviceRouter.post(
         },
       })
 
-      response.status(201).json({
+      return response.status(201).json({
         success: true,
         message: 'Service saved successfully',
         data: service,
@@ -147,9 +147,166 @@ serviceRouter.post(
 )
 
 // Patch route
-serviceRouter.patch('/:id', async (request, response) => {})
+serviceRouter.patch(
+  '/:id',
+  upload.fields([
+    { name: 'coverImage', maxCount: 1 },
+    { name: 'thumbnail', maxCount: 1 },
+  ]),
+  async (request, response) => {
+    let thumbnailResult
+    let coverImageResult
+    let oldThumbnailPublicId
+    let oldCoverImagePublicId
+    let isDatabaseSaved = false
+    try {
+      const existingService = await Service.findOne({
+        _id: request.params.id,
+        isDeleted: false,
+      })
+      if (!existingService) {
+        return response.status(404).json({
+          success: false,
+          message: 'Service not found.',
+        })
+      }
+
+      if (request.body.name !== undefined) {
+        existingService.name = request.body.name
+      }
+      if (request.body.description !== undefined) {
+        existingService.description = request.body.description
+      }
+      if (request.body.features !== undefined) {
+        existingService.features = parseJSON(request.body.features, 'features')
+      }
+      if (request.body.metaTitle !== undefined) {
+        existingService.metaTitle = request.body.metaTitle
+      }
+      if (request.body.metaDescription !== undefined) {
+        existingService.metaDescription = request.body.metaDescription
+      }
+      if (request.body.displayOrder !== undefined) {
+        const displayOrder = Number(request.body.displayOrder)
+        if (
+          request.body.displayOrder.trim() === '' ||
+          !Number.isInteger(displayOrder) ||
+          displayOrder < 1
+        ) {
+          return response.status(400).json({
+            success: false,
+            message: 'A valid display order is required.',
+          })
+        }
+        existingService.displayOrder = displayOrder
+      }
+
+      const coverImageFile = request.files?.coverImage?.[0]
+      if (coverImageFile) {
+        oldCoverImagePublicId = existingService.coverImage.publicId
+        coverImageResult = await uploadToCloudinary(
+          coverImageFile.buffer,
+          'ssde/service/coverImage',
+        )
+        existingService.coverImage = {
+          url: coverImageResult.secure_url,
+          publicId: coverImageResult.public_id,
+        }
+      }
+      const thumbnailFile = request.files?.thumbnail?.[0]
+      if (thumbnailFile) {
+        oldThumbnailPublicId = existingService.thumbnail.publicId
+        thumbnailResult = await uploadToCloudinary(
+          thumbnailFile.buffer,
+          'ssde/service/thumbnail',
+        )
+        existingService.thumbnail = {
+          url: thumbnailResult.secure_url,
+          publicId: thumbnailResult.public_id,
+        }
+      }
+
+      await existingService.save()
+      isDatabaseSaved = true
+
+      if (oldCoverImagePublicId) {
+        try {
+          await deleteFromCloudinary(oldCoverImagePublicId)
+        } catch (cleanupError) {
+          logger.error('Failed to delete old cover image.', cleanupError)
+        }
+      }
+      if (oldThumbnailPublicId) {
+        try {
+          await deleteFromCloudinary(oldThumbnailPublicId)
+        } catch (cleanupError) {
+          logger.error('Failed to delete old thumbnail.', cleanupError)
+        }
+      }
+
+      response.status(200).json({
+        success: true,
+        message: 'Service updated successfully.',
+        data: existingService,
+      })
+    } catch (error) {
+      logger.error('Failed to update service.', error)
+
+      if (!isDatabaseSaved && coverImageResult?.public_id) {
+        try {
+          await deleteFromCloudinary(coverImageResult.public_id)
+        } catch (cleanupError) {
+          logger.error('Failed to delete new cover image.', cleanupError)
+        }
+      }
+      if (!isDatabaseSaved && thumbnailResult?.public_id) {
+        try {
+          await deleteFromCloudinary(thumbnailResult.public_id)
+        } catch (cleanupError) {
+          logger.error('Failed to delete new thumbnail.', cleanupError)
+        }
+      }
+
+      return response.status(error.statusCode || 500).json({
+        success: false,
+        message: error.statusCode ? error.message : 'Failed to update service.',
+      })
+    }
+  },
+)
 
 // Delete route
-serviceRouter.delete('/:id', async (request, response) => {})
+serviceRouter.delete('/:id', async (request, response) => {
+  try {
+    const existingService = await Service.findOne({
+      _id: request.params.id,
+      isDeleted: false,
+    })
+    if (!existingService) {
+      return response.status(404).json({
+        success: false,
+        message: 'Service not found.',
+      })
+    }
+
+    existingService.isDeleted = true
+    existingService.deletedAt = new Date()
+
+    await existingService.save()
+
+    response.status(200).json({
+      success: true,
+      message: 'Service deleted successfully.',
+      data: existingService,
+    })
+  } catch (error) {
+    logger.error('Failed to delete service.', error)
+
+    return response.status(500).json({
+      success: false,
+      message: 'Failed to delete service.',
+    })
+  }
+})
 
 module.exports = serviceRouter

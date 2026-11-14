@@ -244,7 +244,7 @@ serviceRouter.patch(
         }
       }
 
-      response.status(200).json({
+      return response.status(200).json({
         success: true,
         message: 'Service updated successfully.',
         data: existingService,

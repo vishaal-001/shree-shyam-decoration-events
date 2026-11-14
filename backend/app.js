@@ -5,6 +5,10 @@ const logger = require('./utils/logger')
 const mongoose = require('mongoose')
 const websiteSettingsRouter = require('./controllers/websiteSettings')
 const serviceRouter = require('./controllers/service')
+const packageRouter = require('./controllers/package')
+const galleryRouter = require('./controllers/gallery')
+const adminRouter = require('./controllers/admin')
+const galleryCategoryRouter = require('./controllers/galleryCategory')
 const cloudinary = require('cloudinary').v2
 
 logger.info('connecting to mongodb')
@@ -31,7 +35,11 @@ app.get('/', (request, response) => {
   response.send('<h2>Vishal is here<h2>')
 })
 
+app.use('/api/admin', adminRouter)
 app.use('/api/settings', websiteSettingsRouter)
 app.use('/api/services', serviceRouter)
+app.use('/api/package', packageRouter)
+app.use('/api/gallery', galleryRouter)
+app.use('/api/gallery-categories', galleryCategoryRouter)
 
 module.exports = app

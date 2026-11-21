@@ -9,6 +9,7 @@ const parseJSON = require('../utils/parseJson')
 const Service = require('../models/Service')
 const upload = require('../middleware/upload')
 const mongoose = require('mongoose')
+const authenticateAdmin = require('../middleware/auth')
 
 //GET Route
 packageRouter.get('/', async (request, response) => {
@@ -35,7 +36,7 @@ packageRouter.get('/', async (request, response) => {
 
 //POST Route
 packageRouter.post(
-  '/',
+  '/',authenticateAdmin,
   upload.fields([
     { name: 'coverImage', maxCount: 1 },
     { name: 'thumbnail', maxCount: 1 },
@@ -179,7 +180,7 @@ packageRouter.post(
 
 //PATCH Route
 packageRouter.patch(
-  '/:id',
+  '/:id',authenticateAdmin,
   upload.fields([
     {
       name: 'coverImage',
@@ -337,7 +338,7 @@ packageRouter.patch(
 )
 
 //DELETE Route
-packageRouter.delete('/:id', async(request, response) => {
+packageRouter.delete('/:id',authenticateAdmin, async(request, response) => {
   try{
     if(!mongoose.isValidObjectId(request.params.id)){
       return response.status(400).json({

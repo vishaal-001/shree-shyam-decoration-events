@@ -7,6 +7,7 @@ const {
 } = require('../utils/cloudinary')
 const logger = require('../utils/logger')
 const parseJSON = require('../utils/parseJson')
+const authenticateAdmin = require('../middleware/auth')
 
 // GET Route
 websiteSettingsRouter.get('/', async (request, response) => {
@@ -26,7 +27,7 @@ websiteSettingsRouter.get('/', async (request, response) => {
 
 //  POST Route
 websiteSettingsRouter.post(
-  '/',
+  '/',authenticateAdmin,
   upload.fields([
     {
       name: 'logo',
@@ -135,7 +136,7 @@ websiteSettingsRouter.post(
 
 // PATCH Route or Route for update existingSettings
 websiteSettingsRouter.patch(
-  '/',
+  '/',authenticateAdmin,
   upload.fields([
     {
       name: 'logo',
@@ -335,7 +336,7 @@ websiteSettingsRouter.patch(
   },
 )
 
-websiteSettingsRouter.delete('/', async (request, response) => {
+websiteSettingsRouter.delete('/',authenticateAdmin, async (request, response) => {
   response.json({ message: 'under improvement' })
 })
 

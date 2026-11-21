@@ -4,6 +4,7 @@ const Service = require('../models/Service')
 const Package = require('../models/Package')
 const GalleryCategory = require('../models/GalleryCategory')
 const mongoose = require('mongoose')
+const authenticateAdmin = require('../middleware/auth')
 
 const upload = require('../middleware/upload')
 const {
@@ -37,7 +38,7 @@ galleryRouter.get('/', async (request, response) => {
 })
 
 //POST Route
-galleryRouter.post('/', upload.single('media'), async (request, response) => {
+galleryRouter.post('/',authenticateAdmin, upload.single('media'), async (request, response) => {
   let uploadResult
 
   try {
@@ -264,7 +265,7 @@ galleryRouter.post('/', upload.single('media'), async (request, response) => {
 
 // PATCH Route
 galleryRouter.patch(
-  '/:id',
+  '/:id',authenticateAdmin,
   upload.single('media'),
   async (request, response) => {
     let newUploadResult
@@ -612,7 +613,7 @@ galleryRouter.patch(
 
 
 // DELETE Route
-galleryRouter.delete('/:id', async (request, response) => {
+galleryRouter.delete('/:id',authenticateAdmin, async (request, response) => {
   try {
     if (!mongoose.isValidObjectId(request.params.id)) {
       return response.status(400).json({

@@ -7,6 +7,7 @@ const {
 } = require('../utils/cloudinary')
 const logger = require('../utils/logger')
 const parseJSON = require('../utils/parseJson')
+const authenticateAdmin = require('../middleware/auth')
 
 // Get route
 serviceRouter.get('/', async (request, response) => {
@@ -32,6 +33,7 @@ serviceRouter.get('/', async (request, response) => {
 // Post route
 serviceRouter.post(
   '/',
+  authenticateAdmin,
   upload.fields([
     { name: 'thumbnail', maxCount: 1 },
     {
@@ -149,6 +151,7 @@ serviceRouter.post(
 // Patch route
 serviceRouter.patch(
   '/:id',
+  authenticateAdmin,
   upload.fields([
     { name: 'coverImage', maxCount: 1 },
     { name: 'thumbnail', maxCount: 1 },
@@ -276,7 +279,7 @@ serviceRouter.patch(
 )
 
 // Delete route
-serviceRouter.delete('/:id', async (request, response) => {
+serviceRouter.delete('/:id', authenticateAdmin, async (request, response) => {
   try {
     const existingService = await Service.findOne({
       _id: request.params.id,
